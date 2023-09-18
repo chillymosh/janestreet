@@ -16,7 +16,7 @@ example facts:
 
 
 Fact = tuple[str, float | int, str]
-Query = tuple[int | float, str, str]
+Query = tuple[float | int, str, str]
 
 
 class Node:
