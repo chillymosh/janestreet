@@ -1,6 +1,5 @@
 from __future__ import annotations
-from collections import defaultdict
-from queue import Queue
+from collections import defaultdict, deque
 
 Fact = tuple[str, float | int, str]
 Query = tuple[float | int, str, str]
@@ -15,7 +14,7 @@ class Node:
             self.edges.append(Edge(multiplier, other_node))
 
 class Edge:
-    def __init__(self, multiplier: float, node: Node):
+    def __init__(self, multiplier: float, node: Node) -> None:
         self.multiplier = multiplier
         self.node = node
 
@@ -38,11 +37,10 @@ def answer_query(query: Query, facts: dict[str, Node]) -> float | None:
     from_node = facts[from_unit]
     to_node = facts[to_unit]
 
-    to_visit: Queue[tuple[Node, int | float]] = Queue()
-    to_visit.put((from_node, starting_amount))
+    to_visit = deque([(from_node, starting_amount)])
     visited = {from_node}
-    while not to_visit.empty():
-        current_node, current_amount = to_visit.get()
+    while to_visit:
+        current_node, current_amount = to_visit.popleft()
         if current_node == to_node:
             return current_amount
 
@@ -50,7 +48,7 @@ def answer_query(query: Query, facts: dict[str, Node]) -> float | None:
             if edge.node not in visited:
                 visited.add(edge.node)
                 with_latest_multiplier = current_amount * edge.multiplier
-                to_visit.put((edge.node, with_latest_multiplier))
+                to_visit.append((edge.node, with_latest_multiplier))
 
     return None
 

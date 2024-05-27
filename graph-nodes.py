@@ -30,7 +30,7 @@ class Node:
 
 
 class Edge:
-    def __init__(self, multiplier: float, node: Node):
+    def __init__(self, multiplier: float, node: Node) -> None:
         self.multiplier = multiplier
         self.node = node
 
@@ -38,25 +38,20 @@ class Edge:
 def parse_facts(facts: list[Fact]) -> dict[str, Node]:
     name_to_node: dict[str, Node] = {}
     for left_unit, multiplier, right_unit in facts:
-        if left_unit not in name_to_node:
-            left_node = Node(left_unit)
-            name_to_node[left_unit] = left_node
-        if right_unit not in name_to_node:
-            right_node = Node(right_unit)
-            name_to_node[right_unit] = right_node
-        name_to_node[left_unit].add_edge(multiplier, name_to_node[right_unit])
-        name_to_node[right_unit].add_edge(1 / multiplier, name_to_node[left_unit])
+        left_node = name_to_node.setdefault(left_unit, Node(left_unit))
+        right_node = name_to_node.setdefault(right_unit, Node(right_unit))
+        left_node.add_edge(multiplier, right_node)
+        right_node.add_edge(1 / multiplier, left_node)
 
     return name_to_node
 
 
 def answer_query(query: Query, facts: dict[str, Node]) -> float | None:
     starting_amount, from_unit, to_unit = query
-    if from_unit not in facts or to_unit not in facts:
+    from_node = facts.get(from_unit)
+    to_node = facts.get(to_unit)
+    if not from_node or not to_node:
         return None
-
-    from_node = facts[from_unit]
-    to_node = facts[to_unit]
 
     to_visit: Queue[tuple[Node, float]] = Queue()
     to_visit.put((from_node, starting_amount))
